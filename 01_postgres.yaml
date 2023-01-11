@@ -1,11 +1,21 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: db-postgres-secret
+  namespace: credit-pipeline-namespace
+  labels:
+    app: credit-pipeline-app
+data:
+  POSTGRES_PASSWORD: cG9zdGdyZXM=
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: db-postgres-configmap
+  namespace: credit-pipeline-namespace
   labels:
-    app: db-postgres-config
-  name: db-postgres-config
+    app: credit-pipeline-app
 data:
-  POSTGRES_PASSWORD: "postgres"
   init.sql: |-
     CREATE USER ms_deal_admin NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD 'ms_deal_admin';
     CREATE USER ms_deal_user NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD 'ms_deal_user';
@@ -34,9 +44,10 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: db-postgres-service
   name: db-postgres-service
+  namespace: credit-pipeline-namespace
+  labels:
+    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -44,29 +55,33 @@ spec:
       nodePort: 30183
       targetPort: 5432
   selector:
-    app: db-postgres
+    app: credit-pipeline-app
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: db-postgres-deployment
+  namespace: credit-pipeline-namespace
   labels:
-    app: db-postgres
-  name: db-postgres
+    app: credit-pipeline-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: db-postgres
+      app: credit-pipeline-app
   strategy: { }
   template:
     metadata:
       labels:
-        app: db-postgres
+        app: credit-pipeline-app
     spec:
       volumes:
-        - name: db-postgres-config
+        - name: db-postgres-configmap
           configMap:
-            name: db-postgres-config
+            name: db-postgres-configmap
+        - name: db-postgres-secret
+          secret:
+            secretName: db-postgres-secret
       containers:
         - name: db-postgres
           image: postgres:13.1
@@ -75,12 +90,12 @@ spec:
           env:
             - name: POSTGRES_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: POSTGRES_PASSWORD
-                  name: db-postgres-config
+                  name: db-postgres-secret
           volumeMounts:
             - mountPath: /docker-entrypoint-initdb.d/
-              name: db-postgres-config
+              name: db-postgres-configmap
           resources:
             requests:
               memory: "50Mi"
