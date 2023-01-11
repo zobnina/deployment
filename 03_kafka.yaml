@@ -1,22 +1,24 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: kafka-configmap
+  namespace: credit-pipeline-namespace
   labels:
-    app: kafka-config
-  name: kafka-config
+    app: credit-pipeline-app
 data:
   KAFKA_BROKER_ID: "1"
-  KAFKA_CFG_ZOOKEEPER_CONNECT: "10.100.61.33:2181"
-  KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092"
-  KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+  KAFKA_ZOOKEEPER_CONNECT: "zookeeper-service:2181"
+  KAFKA_LISTENERS: "PLAINTEXT://:9092"
+  KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-service:9092"
   ALLOW_PLAINTEXT_LISTENER: "yes"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: kafka-service
   name: kafka-service
+  namespace: credit-pipeline-namespace
+  labels:
+    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -24,61 +26,63 @@ spec:
       nodePort: 30182
       targetPort: 9092
   selector:
-    app: kafka
+    app: credit-pipeline-app
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: kafka-deployment
+  namespace: credit-pipeline-namespace
   labels:
-    app: kafka
-  name: kafka
+    app: credit-pipeline-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kafka
+      app: credit-pipeline-app
   template:
     metadata:
       labels:
-        app: kafka
+        app: credit-pipeline-app
     spec:
-      hostname: kafka
+      volumes:
+        - name: kafka-configmap
+          configMap:
+            name: kafka-configmap
       containers:
         - env:
             - name: KAFKA_BROKER_ID
               valueFrom:
                 configMapKeyRef:
                   key: KAFKA_BROKER_ID
-                  name: kafka-config
-            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+                  name: kafka-configmap
+            - name: KAFKA_ZOOKEEPER_CONNECT
               valueFrom:
                 configMapKeyRef:
-                  key: KAFKA_CFG_ZOOKEEPER_CONNECT
-                  name: kafka-config
-            - name: KAFKA_CFG_LISTENERS
+                  key: KAFKA_ZOOKEEPER_CONNECT
+                  name: kafka-configmap
+            - name: KAFKA_LISTENERS
               valueFrom:
                 configMapKeyRef:
-                  key: KAFKA_CFG_LISTENERS
-                  name: kafka-config
-            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+                  key: KAFKA_LISTENERS
+                  name: kafka-configmap
+            - name: KAFKA_ADVERTISED_LISTENERS
               valueFrom:
                 configMapKeyRef:
-                  key: KAFKA_CFG_ADVERTISED_LISTENERS
-                  name: kafka-config
+                  key: KAFKA_ADVERTISED_LISTENERS
+                  name: kafka-configmap
             - name: ALLOW_PLAINTEXT_LISTENER
               valueFrom:
                 configMapKeyRef:
                   key: ALLOW_PLAINTEXT_LISTENER
-                  name: kafka-config
-          image: bitnami/kafka:latest
+                  name: kafka-configmap
+          image: wurstmeister/kafka
           imagePullPolicy: IfNotPresent
           name: kafka
           ports:
             - containerPort: 9092
           resources:
             requests:
-              memory: "500Mi"
-              cpu: "500m"
+              memory: "256Mi"
             limits:
               memory: "512Mi"
-              cpu: "512m"
