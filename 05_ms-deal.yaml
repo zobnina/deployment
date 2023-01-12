@@ -21,7 +21,7 @@ metadata:
 data:
   APP_NAME: "ms-deal-0.1.0.jar"
   SERVER_PORT: "8082"
-  DATASOURCE_URL: "jdbc:postgresql://10.1.1.36:5432/ms_deal?currentSchema=ms_deal"
+  DATASOURCE_URL: "jdbc:postgresql://10.1.1.51:5432/ms_deal?currentSchema=ms_deal"
   DATASOURCE_SCHEMA: "ms_deal"
   DATASOURCE_LIQUIBASE_SCHEMA: "ms_deal_liquibase"
   KAFKA_URL: "10.1.1.38:9092"

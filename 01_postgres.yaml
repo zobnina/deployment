@@ -58,13 +58,14 @@ spec:
     app: credit-pipeline-app
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: db-postgres-deployment
   namespace: credit-pipeline-namespace
   labels:
     app: credit-pipeline-app
 spec:
+  serviceName: db-postgres-service
   replicas: 1
   selector:
     matchLabels:
@@ -95,8 +96,19 @@ spec:
           volumeMounts:
             - mountPath: /docker-entrypoint-initdb.d/
               name: db-postgres-configmap
+            - mountPath: /var/lib/postgresql/data
+              name: db-postgres-volume
           resources:
             requests:
               memory: "64Mi"
             limits:
               memory: "128Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: db-postgres-volume
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        storageClassName: local-storage
+        resources:
+          requests:
+            storage: 1Gi
