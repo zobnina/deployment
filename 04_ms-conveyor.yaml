@@ -169,3 +169,21 @@ spec:
               memory: "256Mi"
             limits:
               memory: "256Mi"
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
