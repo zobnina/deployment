@@ -199,4 +199,22 @@ spec:
               memory: "512Mi"
             limits:
               memory: "512Mi"
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
       restartPolicy: Always
