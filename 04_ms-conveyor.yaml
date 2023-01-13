@@ -3,8 +3,6 @@ kind: ConfigMap
 metadata:
   name: ms-conveyor-configmap
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   APP_NAME: "ms-conveyor.jar"
   CONVEYOR_AMOUNT_BIG: "2500000"
@@ -31,8 +29,6 @@ kind: Service
 metadata:
   name: ms-conveyor-service
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -40,7 +36,7 @@ spec:
       nodePort: 30185
       targetPort: 8081
   selector:
-    app: credit-pipeline-app
+    app: ms-conveyor-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,16 +44,16 @@ metadata:
   name: ms-conveyor-deployment
   namespace: credit-pipeline-namespace
   labels:
-    app: credit-pipeline-app
+    app: ms-conveyor-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: credit-pipeline-app
+      app: ms-conveyor-app
   template:
     metadata:
       labels:
-        app: credit-pipeline-app
+        app: ms-conveyor-app
     spec:
       volumes:
         - name: ms-conveyor-configmap

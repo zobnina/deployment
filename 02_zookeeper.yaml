@@ -3,8 +3,6 @@ kind: ConfigMap
 metadata:
   name: zookeeper-configmap
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   ALLOW_ANONYMOUS_LOGIN: "yes"
 ---
@@ -13,8 +11,6 @@ kind: Service
 metadata:
   name: zookeeper-service
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -22,7 +18,7 @@ spec:
       nodePort: 30181
       targetPort: 2181
   selector:
-    app: credit-pipeline-app
+    app: zookeeper-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -30,16 +26,16 @@ metadata:
   name: zookeeper-deployment
   namespace: credit-pipeline-namespace
   labels:
-    app: credit-pipeline-app
+    app: zookeeper-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: credit-pipeline-app
+      app: zookeeper-app
   template:
     metadata:
       labels:
-        app: credit-pipeline-app
+        app: zookeeper-app
     spec:
       volumes:
         - name: zookeeper-configmap

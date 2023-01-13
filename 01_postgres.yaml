@@ -3,8 +3,6 @@ kind: Secret
 metadata:
   name: db-postgres-secret
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   POSTGRES_PASSWORD: cG9zdGdyZXM=
 ---
@@ -13,8 +11,6 @@ kind: ConfigMap
 metadata:
   name: db-postgres-configmap
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   init.sql: |-
     CREATE USER ms_deal_admin NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD 'ms_deal_admin';
@@ -46,8 +42,6 @@ kind: Service
 metadata:
   name: db-postgres-service
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -55,7 +49,7 @@ spec:
       nodePort: 30183
       targetPort: 5432
   selector:
-    app: credit-pipeline-app
+    app: db-postgres-app
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -63,17 +57,17 @@ metadata:
   name: db-postgres-deployment
   namespace: credit-pipeline-namespace
   labels:
-    app: credit-pipeline-app
+    app: db-postgres-app
 spec:
   serviceName: db-postgres-service
   replicas: 1
   selector:
     matchLabels:
-      app: credit-pipeline-app
+      app: db-postgres-app
   template:
     metadata:
       labels:
-        app: credit-pipeline-app
+        app: db-postgres-app
     spec:
       volumes:
         - name: db-postgres-configmap
