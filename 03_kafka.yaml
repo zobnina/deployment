@@ -3,8 +3,6 @@ kind: ConfigMap
 metadata:
   name: kafka-configmap
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   KAFKA_BROKER_ID: "1"
   KAFKA_ZOOKEEPER_CONNECT: "zookeeper-service:2181"
@@ -17,8 +15,6 @@ kind: Service
 metadata:
   name: kafka-service
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -26,7 +22,7 @@ spec:
       nodePort: 30182
       targetPort: 9092
   selector:
-    app: credit-pipeline-app
+    app: kafka-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,16 +30,16 @@ metadata:
   name: kafka-deployment
   namespace: credit-pipeline-namespace
   labels:
-    app: credit-pipeline-app
+    app: kafka-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: credit-pipeline-app
+      app: kafka-app
   template:
     metadata:
       labels:
-        app: credit-pipeline-app
+        app: kafka-app
     spec:
       volumes:
         - name: kafka-configmap

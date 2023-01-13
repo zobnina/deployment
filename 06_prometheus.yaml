@@ -3,8 +3,6 @@ kind: ConfigMap
 metadata:
   name: prometheus-configmap
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 data:
   prometheus.yml: |-
     global:
@@ -20,21 +18,19 @@ data:
         metrics_path: '/actuator/prometheus'
         scrape_interval: 5s
         static_configs:
-          - targets: [ '10.102.235.170:8081' ]
+          - targets: [ 'ms-conveyor-service:8081' ]
       
       - job_name: 'ms-deal'
         metrics_path: '/actuator/prometheus'
         scrape_interval: 5s
         static_configs:
-          - targets: [ '10.110.213.35:8082' ]
+          - targets: [ 'ms-deal-service:8082' ]
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: prometheus-service
   namespace: credit-pipeline-namespace
-  labels:
-    app: credit-pipeline-app
 spec:
   type: NodePort
   ports:
@@ -42,7 +38,7 @@ spec:
       nodePort: 30186
       targetPort: 9090
   selector:
-    app: credit-pipeline-app
+    app: prometheus-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -50,16 +46,16 @@ metadata:
   name: prometheus-deployment
   namespace: credit-pipeline-namespace
   labels:
-    app: credit-pipeline-app
+    app: prometheus-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: credit-pipeline-app
+      app: prometheus-app
   template:
     metadata:
       labels:
-        app: credit-pipeline-app
+        app: prometheus-app
     spec:
       volumes:
         - name: prometheus-configmap
