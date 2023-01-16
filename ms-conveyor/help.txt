@@ -1,0 +1,1 @@
+helm install ms-conveyor . -f values.yaml
