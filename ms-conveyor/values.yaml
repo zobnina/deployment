@@ -1,0 +1,38 @@
+msConveyor:
+  name: ms-conveyor
+  namespace: credit-pipeline-namespace
+
+replicaCount: 1
+
+image:
+  repository: lexana/java-service
+  pullPolicy: IfNotPresent
+  tag: ms-conveyor
+
+service:
+  type: ClusterIP
+  port: 8081
+
+resources:
+  requests:
+    memory: "256Mi"
+  limits:
+    memory: "256Mi"
+
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+  timeoutSeconds: 1
+  httpGet:
+    path: /actuator/health/readiness
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+  timeoutSeconds: 1
+  httpGet:
+    path: /actuator/health/liveness
