@@ -1,0 +1,16 @@
+prometheus:
+  name: prometheus
+  namespace: credit-pipeline-namespace
+
+service:
+  type: NodePort
+  port: 9090
+  nodePort: 30186
+
+replicaCount: 1
+
+resources:
+  requests:
+    memory: "64Mi"
+  limits:
+    memory: "128Mi"
