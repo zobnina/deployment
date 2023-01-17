@@ -1,0 +1,41 @@
+msDeal:
+  name: ms-deal
+  namespace: credit-pipeline-namespace
+
+replicaCount: 1
+
+image:
+  repository: lexana/java-service
+  pullPolicy: IfNotPresent
+  tag: ms-deal
+
+service:
+  type: NodePort
+  port: 8082
+  nodePort: 30184
+
+resources:
+  requests:
+    memory: "512Mi"
+  limits:
+    memory: "512Mi"
+
+readinessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  failureThreshold: 3
+  successThreshold: 1
+  timeoutSeconds: 1
+  httpGet:
+    path: /actuator/health/readiness
+
+livenessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  failureThreshold: 3
+  successThreshold: 1
+  timeoutSeconds: 1
+  httpGet:
+    path: /actuator/health/liveness
+
+restartPolicy: Always

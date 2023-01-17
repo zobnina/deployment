@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.msDeal.name }}-deployment
+  namespace: {{ .Values.msDeal.namespace }}
+  labels:
+    app: {{ .Values.msDeal.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.msDeal.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.msDeal.name }}
+    spec:
+      volumes:
+        - name: {{ .Values.msDeal.name }}-configmap
+          configMap:
+            name: {{ .Values.msDeal.name }}-configmap
+        - name: {{ .Values.msDeal.name }}-secret
+          secret:
+            secretName: {{ .Values.msDeal.name }}-secret
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ .Values.msDeal.name }}-configmap
+            - secretRef:
+                name: {{ .Values.msDeal.name }}-secret
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Values.msDeal.name }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.port }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.port }}
+      restartPolicy: {{ .Values.restartPolicy }}
