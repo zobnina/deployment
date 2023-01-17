@@ -1,0 +1,20 @@
+zookeeper:
+  name: zookeeper
+  namespace: credit-pipeline-namespace
+
+service:
+  type: NodePort
+  port: 2181
+  nodePort: 30181
+
+replicaCount: 1
+
+image:
+  repository: wurstmeister/zookeeper
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "128Mi"
+  limits:
+    memory: "128Mi"

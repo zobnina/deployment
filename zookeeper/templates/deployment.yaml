@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.zookeeper.name }}-deployment
+  namespace: {{ .Values.zookeeper.namespace }}
+  labels:
+    app: {{ .Values.zookeeper.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.zookeeper.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.zookeeper.name }}
+    spec:
+      volumes:
+        - name: {{ .Values.zookeeper.name }}-configmap
+          configMap:
+            name: {{ .Values.zookeeper.name }}-configmap
+      containers:
+        - image: {{ .Values.image.repository }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Values.zookeeper.name }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              valueFrom:
+                configMapKeyRef:
+                  key: ALLOW_ANONYMOUS_LOGIN
+                  name: {{ .Values.zookeeper.name }}-configmap
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
