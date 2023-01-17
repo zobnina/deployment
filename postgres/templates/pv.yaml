@@ -1,0 +1,29 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.postgres.name }}-local-storage
+provisioner: {{ .Values.provisioner }}
+volumeBindingMode: {{ .Values.volumeBindingMode }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.postgres.name }}-persistent-volume
+spec:
+  capacity:
+    storage: {{ .Values.volume.capacity.storage }}
+  volumeMode: {{ .Values.volume.volumeMode }}
+  accessModes:
+    - {{ .Values.volume.accessModes }}
+  persistentVolumeReclaimPolicy: {{ .Values.volume.persistentVolumeReclaimPolicy }}
+  storageClassName: {{ .Values.postgres.name }}-local-storage
+  local:
+    path: /mnt
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ .Values.nodeName }}

@@ -1,16 +1,8 @@
 apiVersion: v1
-kind: Secret
-metadata:
-  name: db-postgres-secret
-  namespace: credit-pipeline-namespace
-data:
-  POSTGRES_PASSWORD: cG9zdGdyZXM=
----
-apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: db-postgres-configmap
-  namespace: credit-pipeline-namespace
+  name: {{ .Values.postgres.name }}-configmap
+  namespace: {{ .Values.postgres.namespace }}
 data:
   init.sql: |-
     CREATE USER ms_deal_admin NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD 'ms_deal_admin';
@@ -36,73 +28,3 @@ data:
     GRANT USAGE ON SCHEMA ms_deal TO ms_deal_test;
     GRANT USAGE ON SCHEMA ms_deal_liquibase TO ms_deal_test;
     ALTER DATABASE ms_deal set search_path TO 'ms_deal';
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: db-postgres-service
-  namespace: credit-pipeline-namespace
-spec:
-  type: NodePort
-  ports:
-    - port: 5432
-      nodePort: 30183
-      targetPort: 5432
-  selector:
-    app: db-postgres-app
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: db-postgres-deployment
-  namespace: credit-pipeline-namespace
-  labels:
-    app: db-postgres-app
-spec:
-  serviceName: db-postgres-service
-  replicas: 1
-  selector:
-    matchLabels:
-      app: db-postgres-app
-  template:
-    metadata:
-      labels:
-        app: db-postgres-app
-    spec:
-      volumes:
-        - name: db-postgres-configmap
-          configMap:
-            name: db-postgres-configmap
-        - name: db-postgres-secret
-          secret:
-            secretName: db-postgres-secret
-      containers:
-        - name: db-postgres
-          image: postgres:13.1
-          ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: POSTGRES_PASSWORD
-                  name: db-postgres-secret
-          volumeMounts:
-            - mountPath: /docker-entrypoint-initdb.d/
-              name: db-postgres-configmap
-            - mountPath: /var/lib/postgresql/data
-              name: db-postgres-volume
-          resources:
-            requests:
-              memory: "64Mi"
-            limits:
-              memory: "128Mi"
-  volumeClaimTemplates:
-    - metadata:
-        name: db-postgres-volume
-      spec:
-        accessModes: [ "ReadWriteMany" ]
-        storageClassName: local-storage
-        resources:
-          requests:
-            storage: 1Gi
