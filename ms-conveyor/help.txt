@@ -1,1 +1,2 @@
+helm uninstall ms-conveyor
 helm install ms-conveyor . -f values.yaml
