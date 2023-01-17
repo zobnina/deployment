@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.msConveyor.name }}-service
-  namespace: {{ .Values.msConveyor.namespace }}
+  name: {{ .Values.msDeal.name }}-service
+  namespace: {{ .Values.msDeal.namespace }}
 spec:
-  selector:
-    app: {{ .Values.msConveyor.name }}
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{.Values.service.port }}
       nodePort: {{ .Values.service.nodePort }}
+  selector:
+    app: {{ .Values.msDeal.name }}

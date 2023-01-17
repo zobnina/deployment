@@ -1,5 +1,5 @@
-msConveyor:
-  name: ms-conveyor
+msDeal:
+  name: ms-deal
   namespace: credit-pipeline-namespace
 
 replicaCount: 1
@@ -7,22 +7,22 @@ replicaCount: 1
 image:
   repository: lexana/java-service
   pullPolicy: IfNotPresent
-  tag: ms-conveyor
+  tag: ms-deal
 
 service:
   type: NodePort
-  port: 8081
-  nodePort: 30185
+  port: 8082
+  nodePort: 30184
 
 resources:
   requests:
-    memory: "256Mi"
+    memory: "512Mi"
   limits:
-    memory: "256Mi"
+    memory: "512Mi"
 
 readinessProbe:
-  initialDelaySeconds: 30
-  periodSeconds: 10
+  initialDelaySeconds: 60
+  periodSeconds: 15
   failureThreshold: 3
   successThreshold: 1
   timeoutSeconds: 1
@@ -30,10 +30,12 @@ readinessProbe:
     path: /actuator/health/readiness
 
 livenessProbe:
-  initialDelaySeconds: 30
-  periodSeconds: 10
+  initialDelaySeconds: 60
+  periodSeconds: 15
   failureThreshold: 3
   successThreshold: 1
   timeoutSeconds: 1
   httpGet:
     path: /actuator/health/liveness
+
+restartPolicy: Always
