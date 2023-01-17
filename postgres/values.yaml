@@ -1,0 +1,33 @@
+postgres:
+  name: postgres
+  namespace: credit-pipeline-namespace
+
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+volume:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  persistentVolumeReclaimPolicy: Retain
+  accessModes: ReadWriteMany
+
+nodeName: docker-desktop
+
+service:
+  type: NodePort
+  port: 5432
+  nodePort: 30183
+
+replicaCount: 1
+
+image:
+  repository: postgres
+  pullPolicy: IfNotPresent
+  tag: 13.1
+
+resources:
+  requests:
+    memory: "64Mi"
+  limits:
+    memory: "128Mi"
