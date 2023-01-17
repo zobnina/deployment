@@ -1,0 +1,20 @@
+kafka:
+  name: kafka
+  namespace: credit-pipeline-namespace
+
+service:
+  type: NodePort
+  port: 9092
+  nodePort: 30182
+
+replicaCount: 1
+
+image:
+  repository: wurstmeister/kafka
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "256Mi"
+  limits:
+    memory: "512Mi"
